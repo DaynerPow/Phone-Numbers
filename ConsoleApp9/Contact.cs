@@ -17,8 +17,8 @@ namespace ConsoleApp9
             public Contact(string name, List<string> phoneNumbers, string address = "")
             {
                 this.id = autoInc++;
-                this.name = name;
-                this.phoneNumbers = phoneNumbers;
+                this.setName(name);
+                this.phoneNumbers = new List<string>(phoneNumbers);
                 this.address = address;
             }
 
@@ -28,37 +28,64 @@ namespace ConsoleApp9
 
             public void setName(string name)
             {
-                if (name.Trim().Length != 0)
-                {
-                    this.name = name;
-                }
+                if (!string.IsNullOrEmpty(name))
+                    if (name.Trim().Length > 2)
+                    {
+                        this.name = name.Trim();
+                    }
+                else throw new ArgumentException("Invalid name.");
             }
+
+        public void setPhoneNumbers(List<string> phoneNumbers)
+        {
+            if (phoneNumbers == null || phoneNumbers.Count == 0)
+                throw new ArgumentException("At least one phone number is required.");
+            this.phoneNumbers = phoneNumbers; 
+        }
 
             public string getAddress() { return address; }
             public void setAddress(string address)
             {
-                if (address.Trim().Length != 0)
-                {
-                    this.address = address;
-                }
+                if (address != null)
+                    if (address.Trim().Length > 5)
+                    {
+                        this.address = address.Trim();
+                    }
+                else throw new ArgumentException("Invalid address.");
             }
 
             public void addPhoneNumber(string phoneNumber)
             {
-                if (phoneNumber.Trim().Length != 0)
+                if (phoneNumber.Trim().Length != 0 && phoneNumber != null)
                 {
                     this.phoneNumbers.Add(phoneNumber);
                 }
-            }
+                else throw new ArgumentException("Invalid phone number.");
+        }
 
             public void removePhoneNumber(string phoneNumber)
             {
-                this.phoneNumbers.Remove(phoneNumber);
+                if (phoneNumber.Trim().Length != 0 && phoneNumber != null)
+                {
+                    foreach (var exsistingPhoneNumber in phoneNumbers)
+                    {
+                        if (exsistingPhoneNumber == phoneNumber)
+                        {
+                             this.phoneNumbers.Remove(phoneNumber);
+                            return;
+                        }
+                    }
+                }
+                else throw new ArgumentException("Invalid phone number.");
             }
 
             public List<string> getPhoneNumbers()
             {
-                return phoneNumbers; 
+                if (this.phoneNumbers.Count > 0 && this.phoneNumbers != null)
+                {
+                    return phoneNumbers;
+                }
+                else throw new ArgumentException("Invalid phone numbers.");
             }
         
     }
