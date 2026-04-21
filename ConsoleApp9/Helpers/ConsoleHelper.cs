@@ -12,6 +12,7 @@ namespace ConsoleApp9.Helpers
     {
         private readonly ConsoleService _consoleService;
         private readonly ContactService _contactService;
+        private readonly ValidatorService _validatorService = new ValidatorService();
 
         public ConsoleHelper(ConsoleService consoleService, ContactService contactService)
         {
@@ -19,24 +20,15 @@ namespace ConsoleApp9.Helpers
             _contactService = contactService;
         }
 
-
         public void AddContactMenu()
         {
             string name = _consoleService.takeAnswerString("Введіть ім'я контакту:");
             List<string> phoneNumbers = new List<string>();
-            while (true)
-            {
-                string phone = _consoleService.takeAnswerString("Введіть номер телефону (або 'q' для виходу):");
-                if (phone == "")
-                {
-                    throw new Exception("Phone number can`t be empty");
-                }
+            AddingPhoneNumbersMenu(phoneNumbers);
 
-                if (phone.ToLower() == "q") break;
-                phoneNumbers.Add(phone);
-            }
             string address = _consoleService.takeAnswerString("Введіть адресу контакту (необов'язково):");
             _contactService.AddContact(name, phoneNumbers, address);
+
             Console.WriteLine("Контакт успішно додано.");
         }
 
@@ -64,14 +56,14 @@ namespace ConsoleApp9.Helpers
                 throw new Exception("Invalid ID.");
             }
 
-            int answer = _consoleService.takeAnswerInt("Що ви хочете редагувати? (1 - ім'я, 2 - номери телефонів, 3 - адресу):");
-            if (answer < 1 || answer > 3)
-            {
-                throw new Exception("Invalid choice.");
-            }
+            int answer = _consoleService.takeAnswerInt("Що ви хочете редагувати? (1 - ім'я, 2 - номери телефонів, 3 - адресу) 0 - вихід:");
+            _validatorService.ValidateAnswerSwitch(answer, 0, 3);
 
             switch (answer)
             {
+                case 0:
+                    return;
+
                 case 1:
                     string newName = _consoleService.takeAnswerString("Введіть нове ім'я:");
                     _contactService.UpdateNameById(id, newName);
@@ -80,17 +72,8 @@ namespace ConsoleApp9.Helpers
 
                 case 2:
                     List<string> newPhones = new List<string>();
-                    while (true)
-                    {
-                        string phone = _consoleService.takeAnswerString("Введіть новий номер телефону (або 'q' для виходу):");
-                        if (phone == "")
-                        {
-                            throw new Exception("Phone number can`t be empty");
-                        }
+                    AddingPhoneNumbersMenu(newPhones);
 
-                        if (phone.ToLower() == "q") break;
-                        newPhones.Add(phone);
-                    }
                     _contactService.UpdatePhoneById(id, newPhones);
                     break;
 
@@ -110,14 +93,14 @@ namespace ConsoleApp9.Helpers
         public void UpdateContactByNameMenu(string name)
         {
 
-            int answerName = _consoleService.takeAnswerInt("Що ви хочете редагувати? (1 - ім'я, 2 - номери телефонів, 3 - адресу):");
-            if (answerName < 1 || answerName > 3)
-            {
-                throw new Exception("Invalid choice.");
-            }
+            int answerName = _consoleService.takeAnswerInt("Що ви хочете редагувати? (1 - ім'я, 2 - номери телефонів, 3 - адресу) 0 - вихід:");
+            _validatorService.ValidateAnswerSwitch(answerName, 0, 3);
 
             switch (answerName)
             {
+                case 0:
+                    return;
+
                 case 1:
                     string newName = _consoleService.takeAnswerString("Введіть нове ім'я:");
                     _contactService.UpdateNameByName(name, newName);
@@ -126,17 +109,8 @@ namespace ConsoleApp9.Helpers
 
                 case 2:
                     List<string> newPhones = new List<string>();
-                    while (true)
-                    {
-                        string phone = _consoleService.takeAnswerString("Введіть новий номер телефону (або 'q' для виходу):");
-                        if (phone == "")
-                        {
-                            throw new Exception("Phone number can`t be empty");
-                        }
+                    AddingPhoneNumbersMenu(newPhones);
 
-                        if (phone.ToLower() == "q") break;
-                        newPhones.Add(phone);
-                    }
                     _contactService.UpdatePhoneByName(name, newPhones);
                     break;
 
@@ -156,6 +130,21 @@ namespace ConsoleApp9.Helpers
         public void ShowSeparator()
         {
             Console.WriteLine("===================");
+        }
+
+        public void AddingPhoneNumbersMenu(List<string> phoneNumbers)
+        {
+            while (true)
+            {
+                string phone = _consoleService.takeAnswerString("Введіть номер телефону (або 'q' для виходу):");
+                if (phone == "")
+                {
+                    throw new Exception("Phone number can`t be empty");
+                }
+
+                if (phone.ToLower() == "q") break;
+                phoneNumbers.Add(phone);
+            }
         }
     }
 }

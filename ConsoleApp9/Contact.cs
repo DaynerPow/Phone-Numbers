@@ -3,18 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ConsoleApp9
 {
     internal class Contact
     {
+            [JsonProperty]
             private int id = 0;
             private static int autoInc = 1;
+            [JsonProperty]
             private string name = "";
+            [JsonProperty]
             private List<string> phoneNumbers = new List<string>();
+            [JsonProperty]
             private string address = "";
 
-            public Contact(string name, List<string> phoneNumbers, string address = "")
+        [JsonConstructor]
+        private Contact() { }
+
+        public Contact(string name, List<string> phoneNumbers, string address = "")
             {
                 this.id = autoInc++;
                 this.setName(name);
@@ -87,6 +95,11 @@ namespace ConsoleApp9
                 }
                 else throw new ArgumentException("Invalid phone numbers.");
             }
-        
+
+        public static void SetAutoInc(int nextId)
+        {
+            autoInc = nextId;
+        }
+
     }
 }

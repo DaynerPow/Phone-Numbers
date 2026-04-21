@@ -19,5 +19,17 @@ namespace ConsoleApp9.Services
             Console.WriteLine(text);
             return Convert.ToInt32(Console.ReadLine());
         }
+
+        public void PrintContact(Contact contact)
+        {
+            Console.WriteLine("ID: " + contact.getId());
+            Console.WriteLine("Ім'я: " + contact.getName());
+            Console.WriteLine("Номери телефонів:");
+            foreach (var phone in contact.getPhoneNumbers())
+            {
+                Console.WriteLine("- " + phone);
+            }
+            Console.WriteLine("Адреса: " + contact.getAddress());
+        }
     }
 }

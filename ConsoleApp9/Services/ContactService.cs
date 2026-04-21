@@ -1,39 +1,63 @@
-﻿using System;
+﻿using ConsoleApp9.Services;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
 // Dont use LINQ
-// Зроби методи для валідації данних БІЛЬШЕ ВАЛІЛАЦІЇ!!!!!
-// Дороби пошук контактів
-// Голова вже не так болить, але все ж таки краще розділити код на менші методи, щоб було легше читати і підтримувати.
+// Валідація номера телефону недоробна, потрібно перевіряти на допустимі символи (дозволено лише цифри, +, #, *), а також на довжину (від 5 до 15 символів).
 
 namespace ConsoleApp9
 {
     internal class ContactService
     {
-        private readonly List<Contact> contacts = new List<Contact>();
-        private readonly int phoneNumberMinLength = 5, phoneNumberMaxLength = 15, userNameMinLength = 2;
+        private readonly ValidatorService _validatorService = new ValidatorService();
+        private readonly List<Contact> contacts;
+        private const int phoneNumberMinLength = 5, phoneNumberMaxLength = 15, userNameMinLength = 2;
+
+        public ContactService()
+        {
+            contacts = SaveLoad.Load();
+
+            if (contacts.Count > 0)
+            {
+                int maxId = 0;
+                foreach (var contact in contacts)
+                {
+                    if (contact.getId() > maxId)
+                    {
+                        maxId = contact.getId();
+                    }
+                }
+                Contact.SetAutoInc(maxId + 1);
+            }
+        }
 
         public void AddContact(string name, List<string> phoneNumbers, string address = "")
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Name cannot be empty.");
+            _validatorService.ValidateIsEmpty(name);
 
             if (phoneNumbers == null || phoneNumbers.Count == 0)
                 throw new ArgumentException("At least one phone number is required.");
+            foreach (var phone in phoneNumbers)
+            {
+                if (!_validatorService.IsValidPhone(phone))
+                {
+                    throw new ArgumentException("Номер телефону містить недопустимі символи (дозволено лише цифри, +, #, *).");
+                }
+            }
 
-            if (name.Length < userNameMinLength)
-                throw new ArgumentException("Name must be at least " + userNameMinLength + " characters long.");
+            _validatorService.ValidateName(name, userNameMinLength);
 
             foreach (var exsistingContact in contacts)
             {
-                if(exsistingContact.getName().ToLower() == name.ToLower())
+                if (exsistingContact.getName().ToLower() == name.ToLower())
                     throw new ArgumentException("Contact with the same name already exists.");
             }
 
             contacts.Add(new Contact(name, new List<string>(phoneNumbers), address));
+            SaveLoad.Save(contacts);
         }
 
         public List<Contact> GetAll()
@@ -53,28 +77,27 @@ namespace ConsoleApp9
                     return contact;
                 }
             }
-            throw new ArgumentException("Contact not found.");
+            throw null;
         }
 
         public bool AddPhone(int contactId, string phoneNumber)
         {
-            if (string.IsNullOrWhiteSpace(phoneNumber))
-                throw new ArgumentException("Phone number cannot be empty.");
+            _validatorService.ValidateIsEmpty(phoneNumber);
 
-            if (phoneNumber.Length < phoneNumberMinLength || phoneNumber.Length > phoneNumberMaxLength)
-                throw new ArgumentException("Phone number must be between " + phoneNumberMinLength + " and " + phoneNumberMaxLength + " characters long.");
+            _validatorService.ValidatePhoneNumber(phoneNumber, phoneNumberMinLength, phoneNumberMaxLength);
+
 
             var contact = GetById(contactId);
             if (contact == null) return false;
 
             contact.addPhoneNumber(phoneNumber);
+            SaveLoad.Save(contacts);
             return true;
         }
 
         public bool RemovePhone(int contactId, string PhoneNumber)
         {
-            if (string.IsNullOrWhiteSpace(PhoneNumber))
-                throw new ArgumentException("Phone number cannot be empty.");
+            _validatorService.ValidateIsEmpty(PhoneNumber);
 
             var contact = GetById(contactId);
             if (contact == null) return false;
@@ -84,34 +107,34 @@ namespace ConsoleApp9
                 throw new InvalidOperationException("A contact must have at least one phone number.");
 
             contact.removePhoneNumber(PhoneNumber);
+            SaveLoad.Save(contacts);
             return true;
         }
 
         public bool UpdateNameById(int id, string NewName)
         {
-            if (string.IsNullOrWhiteSpace(NewName))
-                throw new ArgumentException("New name cannot be empty.");
+            _validatorService.ValidateIsEmpty(NewName);
 
-            if (NewName.Length < userNameMinLength)
-                throw new ArgumentException("New name must be at least " + userNameMinLength + " characters long.");
+            _validatorService.ValidateName(NewName, userNameMinLength);
 
             var contact = GetById(id);
             if (contact == null) return false;
 
 
             contact.setName(NewName);
+            SaveLoad.Save(contacts);
             return true;
         }
 
         public bool UpdateAddressById(int id, string NewAddress)
         {
-            if (string.IsNullOrWhiteSpace(NewAddress))
-                throw new ArgumentException("New address cannot be empty.");
+            _validatorService.ValidateIsEmpty(NewAddress);
 
             var contact = GetById(id);
             if (contact == null) return false;
 
             contact.setAddress(NewAddress);
+            SaveLoad.Save(contacts);
             return true;
         }
 
@@ -121,31 +144,30 @@ namespace ConsoleApp9
                 throw new ArgumentException("At least one phone number is required.");
             foreach (var phone in NewPhones)
             {
-                if (string.IsNullOrWhiteSpace(phone))
-                    throw new ArgumentException("Phone number cannot be empty.");
+                _validatorService.ValidateIsEmpty(phone);
 
-                if (phone.Length < phoneNumberMinLength || phone.Length > phoneNumberMaxLength)
-                    throw new ArgumentException("Phone number must be between " + phoneNumberMinLength + " and " + phoneNumberMaxLength + " characters long.");
+                _validatorService.ValidatePhoneNumber(phone, phoneNumberMinLength, phoneNumberMaxLength);
             }
             var contact = GetById(id);
             if (contact == null) return false;
             contact.setPhoneNumbers(NewPhones);
+            SaveLoad.Save(contacts);
             return true;
         }
 
         public bool UpdateNameByName(string name, string NewName)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Name cannot be empty.");
-            if (string.IsNullOrWhiteSpace(NewName))
-                throw new ArgumentException("New name cannot be empty.");
-            if (NewName.Length < userNameMinLength)
-                throw new ArgumentException("New name must be at least " + userNameMinLength + " characters long.");
+            _validatorService.ValidateIsEmpty(name);
+            _validatorService.ValidateIsEmpty(NewName);
+
+            _validatorService.ValidateName(NewName, userNameMinLength);
+
             foreach (var contact in contacts)
             {
                 if (contact.getName().Trim().ToLower() == name.Trim().ToLower())
                 {
                     contact.setName(NewName);
+                    SaveLoad.Save(contacts);    
                     return true;
                 }
             }
@@ -154,15 +176,16 @@ namespace ConsoleApp9
 
         public bool UpdateAddressByName(string name, string NewAddress)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Name cannot be empty.");
-            if (string.IsNullOrWhiteSpace(NewAddress))
-                throw new ArgumentException("New address cannot be empty.");
+            _validatorService.ValidateIsEmpty(name);
+
+            _validatorService.ValidateIsEmpty(NewAddress);
+
             foreach (var contact in contacts)
             {
                 if (contact.getName().Trim().ToLower() == name.Trim().ToLower())
                 {
                     contact.setAddress(NewAddress);
+                    SaveLoad.Save(contacts);
                     return true;
                 }
             }
@@ -171,22 +194,22 @@ namespace ConsoleApp9
 
         public bool UpdatePhoneByName(string name, List<string> NewPhones)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Name cannot be empty.");
+            _validatorService.ValidateIsEmpty(name);
+
             if (NewPhones == null || NewPhones.Count == 0)
                 throw new ArgumentException("At least one phone number is required.");
             foreach (var phone in NewPhones)
             {
-                if (string.IsNullOrWhiteSpace(phone))
-                    throw new ArgumentException("Phone number cannot be empty.");
-                if (phone.Length < phoneNumberMinLength || phone.Length > phoneNumberMaxLength)
-                    throw new ArgumentException("Phone number must be between " + phoneNumberMinLength + " and " + phoneNumberMaxLength + " characters long.");
+                _validatorService.ValidateIsEmpty(phone);
+
+                _validatorService.ValidatePhoneNumber(phone, phoneNumberMinLength, phoneNumberMaxLength);
             }
             foreach (var contact in contacts)
             {
                 if (contact.getName().Trim().ToLower() == name.Trim().ToLower())
                 {
                     contact.setPhoneNumbers(NewPhones);
+                    SaveLoad.Save(contacts);
                     return true;
                 }
             }
@@ -202,31 +225,42 @@ namespace ConsoleApp9
             if (contact == null) return false;
 
             contacts.Remove(contact);
+            SaveLoad.Save(contacts);
             return true;
         }
 
         public List<Contact> Search(string query)
         {
-            List<Contact> result = new List<Contact>();
+            List<Contact> foundContacts = new List<Contact>();
+
+            if (string.IsNullOrWhiteSpace(query))
+                return foundContacts;
+
+            string lowerQuery = query.Trim().ToLower();
+
             foreach (var contact in contacts)
             {
-                if (contact.getName().ToLower().Contains(query.ToLower()))
-                {
-                    result.Add(contact);
-                    continue;
-                }
+                bool nameMatches = contact.getName().ToLower().Contains(lowerQuery);
 
+                bool phoneMatches = false;
                 foreach (var phone in contact.getPhoneNumbers())
                 {
-                    if (phone.Contains(query))
+                    if (phone.Contains(query.Trim()))
                     {
-                        result.Add(contact);
+                        phoneMatches = true;
                         break;
                     }
                 }
-            }
-            return result;
 
+                if (nameMatches || phoneMatches)
+                {
+                    foundContacts.Add(contact);
+                }
+            }
+
+            return foundContacts;
         }
+
+        
     }
 }
