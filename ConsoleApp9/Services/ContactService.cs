@@ -224,23 +224,23 @@ namespace ConsoleApp9
             return true;
         }
 
-        public List<Contact> Search(string query)
+        public List<Contact> Search(string wanted)
         {
             List<Contact> foundContacts = new List<Contact>();
 
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(wanted))
                 return foundContacts;
 
-            string lowerQuery = query.Trim().ToLower();
+            string lowerWanted = wanted.Trim().ToLower();
 
             foreach (var contact in contacts)
             {
-                bool nameMatches = contact.getName().ToLower().Contains(lowerQuery);
+                bool nameMatches = contact.getName().ToLower().Contains(lowerWanted);
 
                 bool phoneMatches = false;
                 foreach (var phone in contact.getPhoneNumbers())
                 {
-                    if (phone.Contains(query.Trim()))
+                    if (phone.Contains(lowerWanted))
                     {
                         phoneMatches = true;
                         break;

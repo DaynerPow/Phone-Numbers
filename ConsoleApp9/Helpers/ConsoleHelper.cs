@@ -48,7 +48,7 @@ namespace ConsoleApp9.Helpers
                 Console.WriteLine();
             }
         }
-
+ 
         public void UpdateContactByIdMenu(int id)
         {
             if (id < 1 || id > 2)
