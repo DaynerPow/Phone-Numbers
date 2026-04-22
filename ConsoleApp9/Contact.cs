@@ -19,16 +19,16 @@ namespace ConsoleApp9
             [JsonProperty]
             private string address = "";
 
-        [JsonConstructor]
-        private Contact() { }
+            [JsonConstructor]
+            private Contact() { }
 
         public Contact(string name, List<string> phoneNumbers, string address = "")
-            {
+        {
                 this.id = autoInc++;
                 this.setName(name);
                 this.phoneNumbers = new List<string>(phoneNumbers);
                 this.address = address;
-            }
+        }
 
             public int getId() { return id; }
 

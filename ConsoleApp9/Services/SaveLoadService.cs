@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using ConsoleApp9; // Вкажи свій актуальний namespace
+using ConsoleApp9;
 
-namespace ConsoleApp9 // Має бути такий же, як у ContactService
+namespace ConsoleApp9
 {
     internal static class SaveLoad
     {

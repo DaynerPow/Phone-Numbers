@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 // Dont use LINQ
-// Валідація номера телефону недоробна, потрібно перевіряти на допустимі символи (дозволено лише цифри, +, #, *), а також на довжину (від 5 до 15 символів).
 
 namespace ConsoleApp9
 {
@@ -260,7 +259,5 @@ namespace ConsoleApp9
 
             return foundContacts;
         }
-
-        
     }
 }

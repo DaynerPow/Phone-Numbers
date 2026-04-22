@@ -80,58 +80,7 @@ namespace ConsoleApp9
 
 
                         case 4:
-                            Console.WriteLine("\nОберіть тип пошуку:");
-                            Console.WriteLine("1 - За ім'ям");
-                            Console.WriteLine("2 - За номером телефону");
-                            Console.Write("Ваш вибір: ");
-
-                            int searchType = Convert.ToInt32(Console.ReadLine());
-                            Console.Write("Введіть текст для пошуку: ");
-                            string criterion = Console.ReadLine();
-
-                            List<Contact> allResults = contactService.Search(criterion);
-                            bool foundAny = false;
-
-                            Console.WriteLine("\n--- Результати пошуку ---");
-
-                            switch (searchType)
-                            {
-                                case 1:
-                                    foreach (var c in allResults)
-                                    {
-                                        if (c.getName().ToLower().Contains(criterion.ToLower()))
-                                        {
-                                            consoleService.PrintContact(c);
-                                            foundAny = true;
-                                        }
-                                    }
-                                    break;
-
-                                case 2:
-                                    foreach (var c in allResults)
-                                    {
-                                        foreach (var phone in c.getPhoneNumbers())
-                                        {
-                                            if (phone.Contains(criterion))
-                                            {
-                                                consoleService.PrintContact(c);
-                                                foundAny = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    break;
-
-                                default:
-                                    Console.WriteLine("Помилка: Невірний варіант пошуку.");
-                                    foundAny = true;
-                                    break;
-                            }
-
-                            if (!foundAny)
-                            {
-                                Console.WriteLine("Нічого не знайдено за вашим запитом.");
-                            }
+                           consoleHelper.SearchContactMenu();
                             break;
 
                         case 5:
@@ -172,7 +121,9 @@ namespace ConsoleApp9
             }
             catch (Exception ex)
             {
-                Console.WriteLine("!ПОМИЛКА!  Причина: " + ex.Message);
+                Console.WriteLine("!Error!  \nReason: " + ex.Message);
+                Console.WriteLine("\nНатисніть будь-яку клавішу для продовження...");
+                Console.ReadKey();
             }
         }
     }

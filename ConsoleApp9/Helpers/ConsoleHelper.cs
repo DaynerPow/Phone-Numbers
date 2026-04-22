@@ -127,6 +127,64 @@ namespace ConsoleApp9.Helpers
             }
         }
 
+        public void SearchContactMenu()
+        {
+            Console.WriteLine("\nОберіть тип пошуку:");
+            Console.WriteLine("1 - За ім'ям");
+            Console.WriteLine("2 - За номером телефону");
+            Console.Write("Ваш вибір: ");
+
+            int searchType = Convert.ToInt32(Console.ReadLine());
+            _validatorService.ValidateAnswerSwitch(searchType, 1, 2);
+
+            Console.Write("Введіть текст для пошуку: ");
+            string criterion = Console.ReadLine();
+
+            List<Contact> allResults = _contactService.Search(criterion);
+            bool foundAny = false;
+
+            Console.WriteLine("\n--- Результати пошуку ---");
+
+            switch (searchType)
+            {
+                case 1:
+                    foreach (var c in allResults)
+                    {
+                        if (c.getName().ToLower().Contains(criterion.ToLower()))
+                        {
+                            _consoleService.PrintContact(c);
+                            foundAny = true;
+                        }
+                    }
+                    break;
+
+                case 2:
+                    foreach (var c in allResults)
+                    {
+                        foreach (var phone in c.getPhoneNumbers())
+                        {
+                            if (phone.Contains(criterion))
+                            {
+                                _consoleService.PrintContact(c);
+                                foundAny = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine("Помилка: Невірний варіант пошуку.");
+                    foundAny = true;
+                    break;
+            }
+
+            if (!foundAny)
+            {
+                Console.WriteLine("Нічого не знайдено за вашим запитом.");
+            }
+        }
+
         public void ShowSeparator()
         {
             Console.WriteLine("===================");
@@ -137,6 +195,7 @@ namespace ConsoleApp9.Helpers
             while (true)
             {
                 string phone = _consoleService.takeAnswerString("Введіть номер телефону (або 'q' для виходу):");
+                _validatorService.ValidatePhoneNumber(phone, 5, 15);
                 if (phone == "")
                 {
                     throw new Exception("Phone number can`t be empty");
