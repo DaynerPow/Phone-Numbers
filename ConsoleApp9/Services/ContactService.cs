@@ -1,11 +1,7 @@
 ﻿using ConsoleApp9.Services;
 using System;
 using System.Collections.Generic;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
-// Dont use LINQ
 
 namespace ConsoleApp9
 {
